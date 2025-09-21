@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Analisador de Ameaças — Frontend</title>
+  <style>
+    /* Paleta: laranja (#ff6a00) e preto (#0b0b0b) com tons neutros */
+    :root{
+      --orange:#ff6a00;
+      --black:#0b0b0b;
+      --dark:#111;
+      --muted:#222;
+      --glass: rgba(255,255,255,0.03);
+      --radius:14px;
+      --max-w:980px;
+      --gap:18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(180deg, var(--dark), #070707 60%);
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px 18px;
+    }
+
+    .card{
+      width:100%;
+      max-width:var(--max-w);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:20px;
+      padding:28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,var(--orange),#ff8f42);
+      color:var(--black);font-weight:700;font-size:22px;
+      box-shadow: 0 6px 18px rgba(255,106,0,0.12);
+    }
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color: #ddd;opacity:0.9}
+
+    form{
+      display:grid;
+      grid-template-columns:1fr 380px;
+      gap:var(--gap);
+      margin-top:18px;
+    }
+
+    .col{
+      background:transparent;padding:6px;border-radius:12px;
+    }
+
+    label{display:block;font-size:13px;color:#ddd;margin-bottom:6px}
+    input[type=text], textarea, select{
+      width:100%;padding:10px 12px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:#fff;
+      outline:none;font-size:14px;resize:vertical
+    }
+    textarea{min-height:120px}
+
+    .filebox{
+      display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:10px;border:1px dashed rgba(255,255,255,0.03);
+    }
+    .thumb{width:100%;height:220px;border-radius:10px;object-fit:contain;background:linear-gradient(180deg,#080808,#111);display:block}
+
+    .small{font-size:13px;color:#ccc}
+
+    .actions{display:flex;gap:10px;margin-top:12px}
+    button{
+      background:var(--orange);color:var(--black);padding:10px 14px;border-radius:10px;border:none;font-weight:600;cursor:pointer;
+      box-shadow:0 8px 18px rgba(255,106,0,0.12);
+    }
+    button.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06)}
+
+    .result{
+      background:#060606;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);color:#eee;white-space:pre-wrap;overflow:auto;max-height:420px;font-family:monospace;font-size:13px
+    }
+
+    @media (max-width:900px){
+      form{grid-template-columns:1fr}
+      .thumb{height:200px}
+    }
+
+    footer{margin-top:18px;color:#bbb;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <div class="logo">A</div>
+      <div>
+        <h1>Analisador de Ameaças (STRIDE)</h1>
+        <p class="lead">Envie a arquitetura + imagem. O backend retornará um modelo de ameaças em JSON.</p>
+      </div>
+    </header>
+
+    <form id="threatForm">
+      <div class="col">
+
+        <label for="tipo_aplicacao">Tipo de aplicação</label>
+        <input id="tipo_aplicacao" name="tipo_aplicacao" type="text" placeholder="Ex: Web app, API interna, mobile" required />
+
+        <label for="autenticacao" style="margin-top:12px">Método de autenticação</label>
+        <input id="autenticacao" name="autenticacao" type="text" placeholder="Ex: JWT, OAuth2, basic auth" required />
+
+        <label for="acesso_internet" style="margin-top:12px">Exposta à internet?</label>
+        <select id="acesso_internet" name="acesso_internet" required>
+          <option value="Sim">Sim</option>
+          <option value="Nao">Não</option>
+          <option value="Parcial">Parcial</option>
+        </select>
+
+        <label for="dados_sesiveis" style="margin-top:12px">Dados sensíveis</label>
+        <input id="dados_sesiveis" name="dados_sesiveis" type="text" placeholder="Ex: CPF, cartões, PII" />
+
+        <label for="descricao_aplicacao" style="margin-top:12px">Resumo / README / descrição</label>
+        <textarea id="descricao_aplicacao" name="descricao_aplicacao" placeholder="Cole o README ou descreva o fluxo..." required></textarea>
+
+        <div class="actions">
+          <button type="submit">Analisar Ameaças</button>
+          <button type="button" class="ghost" id="clearBtn">Limpar</button>
+        </div>
+
+      </div>
+
+      <div class="col">
+        <label>Imagem (opcional)</label>
+        <div class="filebox">
+          <img id="preview" class="thumb" alt="Pré-visualização" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><rect width='100%' height='100%' fill='%230a0a0a'/><text x='50%' y='50%' fill='%23fff' font-size='22' dominant-baseline='middle' text-anchor='middle'>Arraste ou selecione uma imagem</text></svg>" />
+          <input id="Imagem" name="Imagem" type="file" accept="image/*" />
+          <div class="small">Dica: imagens grandes podem demorar. O backend aceita base64 embutido.</div>
+        </div>
+
+        <label style="margin-top:12px">Resposta do servidor</label>
+        <div id="result" class="result">Aguardando envio...</div>
+      </div>
+    </form>
+
+    <footer>
+      <div>Design: laranja & preto — tradicional e eficiente.</div>
+      <div class="small">Certifique-se de que o backend esteja acessível em <code>/analisar_ameacas</code></div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('threatForm');
+    const preview = document.getElementById('preview');
+    const fileInput = document.getElementById('Imagem');
+    const resultBox = document.getElementById('result');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // Pré-visualizar imagem
+    fileInput.addEventListener('change', async (e) => {
+      const f = e.target.files[0];
+      if(!f){ preview.src = preview.src; return }
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+    });
+
+    clearBtn.addEventListener('click', () => {
+      form.reset();
+      preview.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><rect width='100%' height='100%' fill='%230a0a0a'/><text x='50%' y='50%' fill='%23fff' font-size='22' dominant-baseline='middle' text-anchor='middle'>Arraste ou selecione uma imagem</text></svg>";
+      resultBox.textContent = 'Aguardando envio...';
+    });
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      resultBox.textContent = 'Enviando...';
+
+      const fd = new FormData(form);
+
+      // Se o servidor estiver em outro host, ajuste a URL abaixo
+      const endpoint = '/analisar_ameacas';
+
+      try{
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: fd,
+        });
+
+        if(!res.ok){
+          const text = await res.text();
+          resultBox.textContent = `Erro ${res.status}: ${text}`;
+          return;
+        }
+
+        const data = await res.json();
+        // Exibir bonito — se for texto dentro de data.result, mostrar isso
+        if(data.result){
+          try{
+            // se result for string com JSON, tentar parse
+            const maybe = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+            resultBox.textContent = JSON.stringify(maybe, null, 2);
+          }catch(e){
+            resultBox.textContent = typeof data.result === 'string' ? data.result : JSON.stringify(data.result, null, 2);
+          }
+        } else {
+          resultBox.textContent = JSON.stringify(data, null, 2);
+        }
+
+      }catch(err){
+        resultBox.textContent = 'Erro ao enviar: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
