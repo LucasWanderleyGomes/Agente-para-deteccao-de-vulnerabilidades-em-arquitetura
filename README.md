@@ -1,5 +1,5 @@
 # Agente-para-deteccao-de-vulnerabilidades-em-arquitetura
-````markdown
+
 # 🛡️ Threat Model Generator (STRIDE)
 
 Este projeto permite analisar ameaças de segurança em aplicações utilizando a metodologia **STRIDE**, combinando descrição técnica e diagramas de arquitetura.  
@@ -13,7 +13,7 @@ O backend foi desenvolvido em **FastAPI** com integração ao **Azure OpenAI**, 
    ```bash
    git clone https://github.com/seu-usuario/seu-repo.git
    cd seu-repo
-````
+
 
 2. Crie e ative um ambiente virtual:
 
