@@ -11,8 +11,9 @@ O backend foi desenvolvido em **FastAPI** com integração ao **Azure OpenAI**, 
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/seu-repo.git
-   cd seu-repo
+   git clone https://github.com/LucasWanderleyGomes/Agente-para-deteccao-de-vulnerabilidades-em-arquitetura
+   cd module-1
+   cd 01-introducao-backend
 
 
 2. Crie e ative um ambiente virtual:
